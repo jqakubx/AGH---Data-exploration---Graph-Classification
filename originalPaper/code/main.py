@@ -5,8 +5,9 @@ import pickle
 import sys, os
 import time
 
+from graph_transform import load_graph_tudataset
 from classifier import evaluate_clf, searchclf
-from graph import load_graph, function_basis, convert2nx, get_subgraphs, new_norm, save_graphs_
+from graph import load_graph, function_basis, convert2nx, get_subgraphs, new_norm, save_graphs_, load_graph_pyg
 from hyperparameter import load_best_params_
 from sklearn.preprocessing import normalize
 
@@ -40,19 +41,34 @@ if __name__ == '__main__':
     cdf_flag = True # cdf versus pdf. True for most dataset.
     his_norm_flag = 'yes'
 
-    graphs, labels = load_graph(dataset)
+    if dataset == "imdb_binary" or dataset == "imdb_multi":
+        graphs, labels = load_graph(dataset)
+    else:
+        graphs, labels = load_graph_tudataset(dataset)
+    # print(graphs[0])
     n = len(graphs)
     graphs_ = []
     direct = os.path.join('../data/cache/', dataset, 'norm_flag_' + str(norm_flag), '')
 
-    try:
-        with open(direct + 'graphs_', 'rb') as f:
-            t0 = time.time()
-            graphs_ = pickle.load(f)
-            print('Finish loading existing graphs. Takes %s'%(time.time() - t0))
-    except IOError:
+    if dataset == "imdb_binary" or dataset == "imdb_multi":
+        try:
+            with open(direct + 'graphs_', 'rb') as f:
+                t0 = time.time()
+                graphs_ = pickle.load(f)
+                print('Finish loading existing graphs. Takes %s'%(time.time() - t0))
+        except IOError:
+            for i in range(n):
+                if i % 50 ==0: print('#'),
+                gi = convert2nx(graphs[i], i)
+                subgraphs = get_subgraphs(gi)
+                gi_s = [function_basis(gi, ['deg'], norm_flag=norm_flag) for gi in subgraphs]
+                gi_s = [g for g in gi_s if g != None]
+                graphs_.append(gi_s)
+            if norm_flag == 'no': graphs_ = new_norm(graphs_, bl_feat)
+            save_graphs_(graphs_, dataset=dataset, norm_flag=norm_flag)
+    else:
         for i in range(n):
-            if i % 50 ==0: print('#'),
+            if i % 50 == 0: print('#'),
             gi = convert2nx(graphs[i], i)
             subgraphs = get_subgraphs(gi)
             gi_s = [function_basis(gi, ['deg'], norm_flag=norm_flag) for gi in subgraphs]

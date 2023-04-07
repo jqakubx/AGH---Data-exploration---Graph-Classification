@@ -44,7 +44,7 @@ def hisgram(lis, n_bin=100, his_norm_flag='yes', lowerbound=-1, upperbound=1, cd
         return [0]*n_bin
     # normalize lis
     # needs to be more rigirous
-    # TODO: test if it helps to normalize lis
+    # TODO: test.py if it helps to normalize lis
     if his_norm_flag == 'yes':
         try:
             assert max(lis) < 1.1 # * 100000 # delelte 100 later
