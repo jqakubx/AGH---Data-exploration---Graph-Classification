@@ -11,6 +11,9 @@ def make_direct(direct):
     if not os.path.exists(direct):
             os.makedirs(direct)
 
+def load_graph_pyg(graphs):
+    pass
+
 def load_graph(graph, debug='off', single_graph_flag=True):
     # exptect label to be numpy.ndarry of shape (n,). However protein_data is different so have to handle it differently
     assert type(graph) == str
@@ -44,8 +47,8 @@ def convert2nx(graph, i, print_flag='False'):
         # print('%s graph has non consecutive keys'%i)
         # print('Missing nodes are the follwing:')
         for i in range(max(graph.keys())):
-            if i not in graph.keys(): print(i, end=' ')
-
+            # if i not in graph.keys(): print(i, end=' ')
+            pass
     # add nodes
     gi = nx.Graph()
     for i in keys: gi.add_node(i) # change from 1 to i.

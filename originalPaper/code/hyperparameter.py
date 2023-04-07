@@ -1,7 +1,7 @@
 def load_best_params_(dataset):
     # the following parameters are used to replicate the results for linear kernel
-
-    if dataset == 'imdb_binary':
+    print(dataset)
+    if dataset == 'imdb_binary' or dataset == 'imdb_binary/IMDB-BINARY':
         best_params_ = {'kernel': 'linear', 'C': 100}
         others = {'n_bin': 70, 'norm_flag': 'no', 'cdf_flag': True }
         res = 74.0
@@ -11,7 +11,7 @@ def load_best_params_(dataset):
         others = {'n_bin': 100, 'norm_flag': 'no', 'cdf_flag': True }
         res = 49.8
         note = {'without using any normalization'}
-    elif dataset == 'reddit_binary':
+    elif dataset == 'reddit_binary' or dataset == 'redditbinary/REDDIT-BINARY':
         best_params_ = {'kernel': 'linear', 'C': 1000}
         others = {'n_bin': 100, 'norm_flag': 'no', 'cdf_flag': True}
         res = 90.0
