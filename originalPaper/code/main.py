@@ -2,22 +2,31 @@ import argparse
 import networkx as nx
 import numpy as np
 
-from baselines import convert_to_vector_dataset_using_graph_invariants, load_or_convert_to_vector_dataset_using_ldp_baseline
+from baselines import convert_to_vectors_graph_invariants, convert_to_vectors_ldp
+from graph import load_graph
+from graph_transform import load_graph_tudataset
 
 from svm import evaluate_svm
 from svm_hyperparameter import load_best_svm_params
 from random_forest import evaluate_random_forest
 
 
-def evaluate(graph_dataset, classifier, baseline, hyperparams):
-    x, y = get_vectors_for_graphs(graph_dataset, baseline, hyperparams=hyperparams)
+def evaluate(dataset, classifier, baseline, hyperparams):
+    if dataset == "imdb_binary" or dataset == "imdb_multi":
+        graphs, labels = load_graph(dataset)
+    else:
+        graphs, labels = load_graph_tudataset(dataset)
+    x, y = convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams=hyperparams)
     evaluate_with_classifier(classifier, dataset, x, y)
 
-def get_vectors_for_graphs(dataset, baseline, hyperparams):
+
+def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
     if baseline == 'ldp':
-        return load_or_convert_to_vector_dataset_using_ldp_baseline(dataset, hyperparams)
+        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams)
     elif baseline == 'graph_invariants':
-        return convert_to_vector_dataset_using_graph_invariants(dataset)
+        return convert_to_vectors_graph_invariants(dataset, graphs, labels)
+    else:
+        raise Exception('Unsupported baseline')
 
 
 def evaluate_with_classifier(classifier, dataset, x, y):
@@ -28,6 +37,7 @@ def evaluate_with_classifier(classifier, dataset, x, y):
         evaluate_random_forest(x, y)
     else:
         raise Exception('Unsupported classifier')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
