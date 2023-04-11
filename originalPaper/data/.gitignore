@@ -1,0 +1,6 @@
+*
+!redditbinary/*
+!imdb_binary/*
+!.gitignore
+!imdb_binary.graph
+!imdb_multi.graph

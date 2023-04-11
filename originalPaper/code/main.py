@@ -31,8 +31,12 @@ def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
 
 def evaluate_with_classifier(classifier, dataset, x, y):
     if classifier == 'svm':
-        best_svm_params = load_best_svm_params(dataset)
-        evaluate_svm(x, y, best_svm_params, 10, n_eval=10)
+        try:
+            svm_params = load_best_svm_params(dataset)
+        except Exception:
+            print(f"No best SVM params found for {dataset}, using defaults.")
+            svm_params = {'kernel': 'linear', 'C': 100}
+        evaluate_svm(x, y, svm_params, 10, n_eval=10)
     elif classifier == 'random_forest':
         evaluate_random_forest(x, y)
     else:

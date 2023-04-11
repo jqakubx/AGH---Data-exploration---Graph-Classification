@@ -88,7 +88,7 @@ def remove_zero_col(data, cor_flag=False):
     else:
         return X
 
-def merge_features(graph, graphs_, allowed, n_bin=30, his_norm_flag='yes', edge_flag=False, cdf_flag=False, uniform_flag = True):
+def merge_features(graph, graphs_, allowed=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg'], n_bin=30, his_norm_flag='yes', edge_flag=False, cdf_flag=False, uniform_flag = True):
     print('Number of bins are %s'%n_bin)
     n = len(graphs_)
     X = np.zeros((n, 1))
