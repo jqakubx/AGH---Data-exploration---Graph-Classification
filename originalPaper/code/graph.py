@@ -15,28 +15,13 @@ def load_graph_pyg(graphs):
     pass
 
 def load_graph(graph, debug='off', single_graph_flag=True):
-    # exptect label to be numpy.ndarry of shape (n,). However protein_data is different so have to handle it differently
-    assert type(graph) == str
-    print('Start Loading from dataset')
+    print(f'Loading graph from dataset {graph}')
     file = os.path.join("../data/", graph + ".graph")
-    # if not os.path.isfile(file): file = '/home/cai.507/Documents/DeepLearning/deep-persistence/dataset/datasets/' + graph + '.graph'
     f = open(file, 'rb')
     data = pickle.load(f, encoding='latin1')
     graphs, labels = data['graph'], data['labels']
     return graphs, labels
 
-    if debug == 'on':
-        print(graph),
-        print(type(labels), )
-        print(np.shape(labels))
-    print('Finish Loading graphs')
-    outputFile = directory + '/graph+label'
-    fw = open(outputFile, 'wb')
-    dataset = (graphs, labels)
-    pickle.dump(dataset, fw)
-    fw.close()
-    print('Finish Saving data for future use')
-    return graphs, labels
 
 def convert2nx(graph, i, print_flag='False'):
     # graph: python dict
@@ -154,7 +139,7 @@ def get_subgraphs(g, threshold=1):
     subgraphs = [c for c in subgraphs if len(c) > threshold]
     return subgraphs
 
-def new_norm(graphs_, bl_feat):
+def new_norm(graphs_, bl_feat=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg']):
     """Normalize graph function uniformly"""
     newnorm = dict(zip(bl_feat, [0] * 5))
     for attr in bl_feat:

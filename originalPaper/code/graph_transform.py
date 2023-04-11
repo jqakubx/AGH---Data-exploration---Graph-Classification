@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from originalPaper.code.graph import load_graph
+from graph import load_graph
 
 # That function work with some datasets from TUDatasted
 # https://chrsmrrs.github.io/datasets/docs/datasets/
