@@ -12,7 +12,7 @@ from tunning import merge_features
 def convert_to_vectors_graph_invariants(graphs, labels):
     vectors = []
     for i in range(len(graphs)):
-        if i % 50 == 0: 
+        if i % 50 == 0:
             print('#', end='\n')
         nx_graph = convert2nx(graphs[i], i)
 
@@ -25,7 +25,7 @@ def convert_to_vectors_graph_invariants(graphs, labels):
         vectors.append(
             [graph_diameter, average_shortest_path, n_nodes, avg_degree]
         )
-    
+
     return np.array(vectors).astype(np.float32), np.array(labels)
 
 
@@ -37,7 +37,7 @@ def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams):
     
     vectors = []
     for i in range(len(graphs)):
-        if i % 50 == 0: 
+        if i % 50 == 0:
             print('#', end='\n')
         gi = convert2nx(graphs[i], i)
         subgraphs = get_subgraphs(gi)
