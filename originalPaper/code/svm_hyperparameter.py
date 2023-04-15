@@ -1,4 +1,4 @@
-def load_best_params_(dataset):
+def load_best_svm_params(dataset):
     # the following parameters are used to replicate the results for linear kernel
     print(dataset)
     if dataset == 'imdb_binary' or dataset == 'imdb_binary/IMDB-BINARY':

@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from originalPaper.code.graph import load_graph
+from graph import load_graph
 
 # That function work with some datasets from TUDatasted
 # https://chrsmrrs.github.io/datasets/docs/datasets/
@@ -15,9 +15,9 @@ from originalPaper.code.graph import load_graph
 # + elif dataset == 'reddit_binary' or dataset == 'redditbinary/REDDIT-BINARY'
 
 def load_graph_tudataset(graph_name):
-    file_A = os.path.join("../data/", graph_name + "_A.txt")
-    file_indicator = os.path.join("../data/", graph_name + "_graph_indicator.txt")
-    file_labels = os.path.join("../data/", graph_name + "_graph_labels.txt")
+    file_A = os.path.join(f"../data/{graph_name}/raw/{graph_name}_A.txt")
+    file_indicator = os.path.join(f"../data/{graph_name}/raw/{graph_name}_graph_indicator.txt")
+    file_labels = os.path.join(f"../data/{graph_name}/raw/{graph_name}_graph_labels.txt")
     f_A = open(file_A, 'r')
     f_ind = open(file_indicator, 'r')
     f_lab = open(file_labels, 'r')

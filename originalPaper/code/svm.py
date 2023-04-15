@@ -25,7 +25,7 @@ def timefunction(method, time_flag=False):
     return timed
 
 @timefunction
-def searchclf(X, Y, i, test_size=0.1, nonlinear_flag='False', verbose=0, print_flag='off'):
+def search_params_svm(X, Y, i, test_size=0.1, nonlinear_flag='False', verbose=0, print_flag='off'):
     if nonlinear_flag == 'True':
         tuned_parameters = [{'kernel': ['linear'], 'C': [0.01, 0.1, 1, 10, 100, 1000]},
                             {'kernel': ['rbf'], 'gamma': [0.01, 0.1, 1, 10,100], 'C': [0.01, 0.1, 1, 10, 100, 1000]}]
@@ -61,7 +61,8 @@ def searchclf(X, Y, i, test_size=0.1, nonlinear_flag='False', verbose=0, print_f
         return clf.best_params_
 
 @timefunction
-def evaluate_clf(X, Y, best_params_, n_splits, n_eval = 10):
+def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
+    print("Evaluating with SVM")
     accuracy = []
     n = n_eval
     for i in range(n):
@@ -88,7 +89,3 @@ def evaluate_clf(X, Y, best_params_, n_splits, n_eval = 10):
     accuracy = np.array(accuracy)
     print('mean is %s, std is %s ' % (accuracy.mean(), accuracy.std()))
     return (accuracy.mean(), accuracy.std())
-
-def normalize_(X, axis=0):
-    from sklearn.preprocessing import normalize
-    return normalize(X, axis=axis)
