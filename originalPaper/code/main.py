@@ -24,7 +24,7 @@ def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
     if baseline == 'ldp':
         return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams)
     elif baseline == 'graph_invariants':
-        return convert_to_vectors_graph_invariants(dataset, graphs, labels, hyperparams)
+        return convert_to_vectors_graph_invariants(graphs, labels)
     else:
         raise Exception('Unsupported baseline')
 
