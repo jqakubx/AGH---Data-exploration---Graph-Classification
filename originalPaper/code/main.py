@@ -38,7 +38,7 @@ def evaluate_with_classifier(classifier, dataset, x, y):
             svm_params = {'kernel': 'linear', 'C': 100}
         evaluate_svm(x, y, svm_params, 10, n_eval=10)
     elif classifier == 'random_forest':
-        evaluate_random_forest(x, y)
+        evaluate_random_forest(x, y, 10, n_eval=10)
     else:
         raise Exception('Unsupported classifier')
 
@@ -68,7 +68,8 @@ if __name__ == '__main__':
         'his_norm_flag': 'yes'
     }
 
-    # evaluate(dataset, classifier='svm', baseline='ldp', hyperparams=hyperparams)
-    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
-    evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
+    evaluate(dataset, classifier='svm', baseline='ldp', hyperparams=hyperparams)
     evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)

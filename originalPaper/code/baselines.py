@@ -7,7 +7,7 @@ from sklearn.preprocessing import normalize
 from tunning import merge_features
 
 
-### GRAPH INVARIANTS - TODO
+### GRAPH INVARIANTS - basic graph baseline
 
 def convert_to_vectors_graph_invariants(graphs, labels):
     vectors = []

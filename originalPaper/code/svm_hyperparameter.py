@@ -6,7 +6,7 @@ def load_best_svm_params(dataset):
         others = {'n_bin': 70, 'norm_flag': 'no', 'cdf_flag': True }
         res = 74.0
         note = {'without using any normalization'}
-    elif dataset == 'imdb_multi':
+    elif dataset == 'imdb_multi' or dataset == 'IMDB-MULTI':
         best_params_ = {'kernel': 'linear', 'C': 10}
         others = {'n_bin': 100, 'norm_flag': 'no', 'cdf_flag': True }
         res = 49.8

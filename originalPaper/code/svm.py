@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn import svm
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score, accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics.pairwise import laplacian_kernel
@@ -63,7 +63,8 @@ def search_params_svm(X, Y, i, test_size=0.1, nonlinear_flag='False', verbose=0,
 @timefunction
 def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
     print("Evaluating with SVM")
-    accuracy = []
+    cvs_accs = []
+    cvs_f1s = []
     n = n_eval
     for i in range(n):
         # after grid search, the best parameter is {'kernel': 'rbf', 'C': 100, 'gamma': 0.1}
@@ -79,13 +80,44 @@ def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
         k_fold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=i)
         if clf.kernel == 'precomputed':
             laplacekernel = laplacian_kernel(X, X, gamma=best_params_['gamma'])
-            cvs = cross_val_score(clf, laplacekernel, Y, n_jobs=-1, cv=k_fold)
+            cvs_acc = cross_val_score(clf, laplacekernel, Y, n_jobs=-1, cv=k_fold, scoring='accuracy')
+            cvs_f1 = cross_val_score(clf, laplacekernel, Y, n_jobs=-1, cv=k_fold, scoring='f1')
             print('CV Laplacian kernel')
         else:
-            cvs = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold)
-        print(cvs)
-        acc = cvs.mean()
-        accuracy.append(acc)
-    accuracy = np.array(accuracy)
-    print('mean is %s, std is %s ' % (accuracy.mean(), accuracy.std()))
-    return (accuracy.mean(), accuracy.std())
+            cvs_acc = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold, scoring='accuracy')
+            cvs_f1 = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold, scoring='f1')
+        # print(cvs)
+        acc = cvs_acc.mean()
+        f1 = cvs_f1.mean()
+        cvs_accs.append(acc)
+        cvs_f1s.append(f1)
+    accuracy = np.array(cvs_accs)
+    f1 = np.array(cvs_f1s)
+    print('Cross val score accuracy: %s' % accuracy.mean())
+    print('Cross val score f1: %s' % f1.mean())
+
+    cvs_accs = []
+    cvs_f1s = []
+    for i in range(n):
+
+        if best_params_['kernel'] == 'linear':
+            clf = svm.SVC(kernel='linear', C=best_params_['C'])
+        elif best_params_['kernel'] == 'rbf':
+            clf = svm.SVC(kernel='rbf', C=best_params_['C'], gamma=best_params_['gamma'])
+        elif best_params_['kernel'] == 'precomputed':  # take care of laplacian case
+            clf = svm.SVC(kernel='precomputed', C=best_params_['C'])
+        else:
+            raise Exception('Parameter Error')
+
+        X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+
+        acc = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        cvs_accs.append(acc)
+        cvs_f1s.append(f1)
+    accuracy = np.array(cvs_accs)
+    f1 = np.array(cvs_f1s)
+    print("Holdout Accuracy: %s" % accuracy.mean())
+    print('Holdout F1 score: %s' % f1.mean())
