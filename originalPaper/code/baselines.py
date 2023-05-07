@@ -32,7 +32,7 @@ def convert_to_vectors_graph_invariants(graphs, labels):
 
 ### LDP - original paper baseline
 
-def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams):
+def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=False):
     norm_flag = hyperparams['norm_flag']
     
     vectors = []
@@ -47,9 +47,15 @@ def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams):
     if norm_flag == 'no':
         vectors = new_norm(vectors)
 
+    base_features = ['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg']
+    extended_features = ['1_0_deg_kurtosis', '1_0_deg_skew']
+
+    features = base_features+extended_features if extended else base_features
+
     x_original = merge_features(
         dataset, 
-        vectors, 
+        vectors,
+        allowed=features,
         n_bin=hyperparams['n_bin'], 
         his_norm_flag=hyperparams['his_norm_flag'], 
         cdf_flag=hyperparams['cdf_flag'], 
