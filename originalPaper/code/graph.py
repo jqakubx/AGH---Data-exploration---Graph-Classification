@@ -3,6 +3,7 @@ from joblib import Parallel, delayed
 import pickle
 import os, sys
 import time
+from scipy.stats import skew, kurtosis
 import numpy as np
 
 def make_direct(direct):
@@ -82,7 +83,7 @@ def attribute_mean(g, i, key='deg', cutoff=1, iteration=0):
         oldkey = key
         key = str(cutoff) + '_' + str(itr) + '_' + oldkey
         key_mean = key + '_mean'; key_min = key + '_min'; key_max = key + '_max'; key_std = key + '_std'
-        key_sum = key + '_sum'
+        key_sum = key + '_sum'; key_kurtosis = key + '_kurtosis'; key_skew = key + '_skew';
 
         if len(nbrs_deg) == 0:
             g._node[i][key_mean] = 0
@@ -90,6 +91,8 @@ def attribute_mean(g, i, key='deg', cutoff=1, iteration=0):
             g._node[i][key_max] = 0
             g._node[i][key_std] = 0
             g._node[i][key_sum] = 0
+            g._node[i][key_kurtosis] = 0
+            g._node[i][key_skew] = 0
         else:
             # assert np.max(nbrs_deg) < 1.1
             g._node[i][key_mean] = np.mean(nbrs_deg)
@@ -97,6 +100,8 @@ def attribute_mean(g, i, key='deg', cutoff=1, iteration=0):
             g._node[i][key_max] = np.max(nbrs_deg)
             g._node[i][key_std] = np.std(nbrs_deg)
             g._node[i][key_sum] = np.sum(nbrs_deg)
+            g._node[i][key_kurtosis] = kurtosis(nbrs_deg)
+            g._node[i][key_skew] = skew(nbrs_deg)
 
 def function_basis(g, allowed, norm_flag = 'no'):
     # input: g

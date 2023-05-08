@@ -42,18 +42,6 @@ def hisgram(lis, n_bin=100, his_norm_flag='yes', lowerbound=-1, upperbound=1, cd
     if lis == []:
         print ('lis is empty')
         return [0]*n_bin
-    # normalize lis
-    # needs to be more rigirous
-    # TODO: test.py if it helps to normalize lis
-    if his_norm_flag == 'yes':
-        try:
-            assert max(lis) < 1.1 # * 100000 # delelte 100 later
-        except AssertionError:
-            print ('The max of list is %s' %max(lis)),
-        assert min(lis) > -1.1
-        max_ = max(lis)
-        # if max_ !=0:
-        #     lis = [i/float(max_) for i in lis]
 
     if not uniform_flag:
         assert lowerbound + 1e-3 > 0
