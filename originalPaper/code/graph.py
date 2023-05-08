@@ -16,7 +16,7 @@ def load_graph_pyg(graphs):
     pass
 
 def load_graph(graph, debug='off', single_graph_flag=True):
-    print(f'Loading graph from dataset {graph}')
+    # print(f'Loading graph from dataset {graph}')
     file = os.path.join("../data/", graph + ".graph")
     f = open(file, 'rb')
     data = pickle.load(f, encoding='latin1')
@@ -136,6 +136,36 @@ def function_basis(g, allowed, norm_flag = 'no'):
                 norm_ = norm(g, attr, norm_flag)
                 for n in g.nodes():
                     g._node[n][attr] /= float(norm_)
+    if 'graph_diameter' in allowed:
+        # diameter
+        graph_diameter = nx.diameter(g)
+        for n in g.nodes():
+            g._node[n]['graph_diameter'] = graph_diameter
+
+        deg_norm = norm(g, 'graph_diameter', norm_flag)
+        for n in g.nodes():
+            g._node[n]['graph_diameter'] /= float(deg_norm)
+
+        # average_path
+        average_path = nx.average_shortest_path_length(g)
+        for n in g.nodes():
+            g._node[n]['average_path'] = average_path
+
+        deg_norm = norm(g, 'average_path', norm_flag)
+        for n in g.nodes():
+            g._node[n]['average_path'] /= float(deg_norm)
+
+        # avg_deg
+        nnodes = g.number_of_nodes()
+        avg_deg = sum(d for n, d in g.degree()) / float(nnodes)
+        for n in g.nodes():
+            g._node[n]['avg_deg'] = avg_deg
+
+        deg_norm = norm(g, 'avg_deg', norm_flag)
+        for n in g.nodes():
+            g._node[n]['avg_deg'] /= float(deg_norm)
+
+
     return g
 
 def get_subgraphs(g, threshold=1):
