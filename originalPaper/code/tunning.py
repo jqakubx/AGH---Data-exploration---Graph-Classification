@@ -82,14 +82,14 @@ def remove_zero_col(data, cor_flag=False):
     inverse_correspondence_dict = dict(zip(remain_col_idx, range(len(remain_col_idx))))
 
     X = np.delete(data, np.where(~data.any(axis=0))[0], axis=1)
-    print('the shape after removing zero columns is ', np.shape(X))
+    # print('the shape after removing zero columns is ', np.shape(X))
     if cor_flag == True:
         return (X, correspondence_dict, inverse_correspondence_dict)
     else:
         return X
 
 def merge_features(graph, graphs_, allowed=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg'], n_bin=30, his_norm_flag='yes', edge_flag=False, cdf_flag=False, uniform_flag = True):
-    print('Number of bins are %s'%n_bin)
+    # print('Number of bins are %s'%n_bin)
     n = len(graphs_)
     X = np.zeros((n, 1))
     for key in allowed:

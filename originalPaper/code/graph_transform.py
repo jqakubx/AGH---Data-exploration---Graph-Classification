@@ -25,7 +25,7 @@ def load_graph_tudataset(graph_name):
     labels = np.array([])
     graphs = dict()
 
-    print("READ GRAPH")
+    # print("READ GRAPH")
     # Read labels
     label_lines = f_lab.readlines()
     for line in label_lines:
@@ -57,7 +57,7 @@ def load_graph_tudataset(graph_name):
     for graph in graphs:
         for edge in graphs[graph]:
             graphs[graph][edge]['neighbors'] = list(dict.fromkeys(graphs[graph][edge]['neighbors']))
-    print("GRAPH READED")
+    # print("GRAPH READED")
     return graphs, labels
 
 
