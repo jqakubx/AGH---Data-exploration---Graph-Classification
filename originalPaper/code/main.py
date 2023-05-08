@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default='imdb_binary', help='dataset')
     parser.add_argument('--n_bin', type=int, default=50, help='number of bins')
-    parser.add_argument('--norm_flag', type=str, default='yes')
+    parser.add_argument('--norm_flag', type=str, default='no')
 
     # for fine tunning
     parser.add_argument('--nonlinear_flag', type=str, default='False',
@@ -68,8 +68,8 @@ if __name__ == '__main__':
         'his_norm_flag': 'yes'
     }
 
-    evaluate(dataset, classifier='svm', baseline='ldp', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='svm', baseline='ldp', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='svm', baseline='graph_invariants', hyperparams=hyperparams)
     evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
-    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
-    # evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
+    evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
     # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)

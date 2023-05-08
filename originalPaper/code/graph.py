@@ -15,7 +15,7 @@ def load_graph_pyg(graphs):
     pass
 
 def load_graph(graph, debug='off', single_graph_flag=True):
-    print(f'Loading graph from dataset {graph}')
+    # print(f'Loading graph from dataset {graph}')
     file = os.path.join("../data/", graph + ".graph")
     f = open(file, 'rb')
     data = pickle.load(f, encoding='latin1')

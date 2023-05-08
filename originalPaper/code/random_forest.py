@@ -15,7 +15,7 @@ def evaluate_random_forest(X, Y, n_splits, n_eval = 10, **rf_kwargs):
 
         k_fold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=i)
         cvs_acc = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold, scoring='accuracy')
-        cvs_f1 = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold, scoring='f1')
+        cvs_f1 = cross_val_score(clf, X, Y, n_jobs=-1, cv=k_fold, scoring='f1_weighted')
         # print(cvs)
         acc = cvs_acc.mean()
         f1 = cvs_f1.mean()
@@ -37,7 +37,7 @@ def evaluate_random_forest(X, Y, n_splits, n_eval = 10, **rf_kwargs):
         y_pred = clf.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average="weighted")
         cvs_accs.append(acc)
         cvs_f1s.append(f1)
     accuracy = np.array(cvs_accs)
