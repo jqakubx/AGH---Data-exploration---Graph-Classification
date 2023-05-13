@@ -27,6 +27,10 @@ def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
         return convert_to_vectors_graph_invariants(graphs, labels)
     elif baseline == 'ldp_extended':
         return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=True)
+    elif baseline == 'ldp_extended2':
+        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=False, extended2=True)
+    elif baseline == 'ldp_extended_full':
+        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=True, extended2=True)
     else:
         raise Exception('Unsupported baseline')
 

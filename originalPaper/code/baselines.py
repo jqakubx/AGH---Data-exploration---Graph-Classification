@@ -39,16 +39,16 @@ def convert_to_vectors_graph_invariants(graphs, labels):
 
 ### LDP - original paper baseline
 
-def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=False):
+def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=False, extended2=False):
     norm_flag = hyperparams['norm_flag']
     
+    extended2_features = ['average_path', 'load_centrality', 'eccentricity']
+
     vectors = []
     for i in range(len(graphs)):
-        # if i % 50 == 0:
-        #     print('#', end='\n')
         gi = convert2nx(graphs[i], i)
         subgraphs = get_subgraphs(gi)
-        gi_s = [function_basis(gi, ['deg'], norm_flag=norm_flag) for gi in subgraphs]
+        gi_s = [function_basis(gi, extended2_features + ['deg'], norm_flag=norm_flag) for gi in subgraphs]
         gi_s = [g for g in gi_s if g != None]
         vectors.append(gi_s)
     if norm_flag == 'no':
@@ -58,6 +58,7 @@ def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=False)
     extended_features = ['1_0_deg_kurtosis', '1_0_deg_skew']
 
     features = base_features+extended_features if extended else base_features
+    features = base_features+extended2_features if extended2 else features
 
     x_original = merge_features(
         dataset, 

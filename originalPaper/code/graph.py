@@ -105,9 +105,7 @@ def attribute_mean(g, i, key='deg', cutoff=1, iteration=0):
 
 def function_basis(g, allowed, norm_flag = 'no'):
     # input: g
-    # output: g with ricci, deg, hop, cc, fiedler computed
-    # allowed = ['ricci', 'deg', 'hop', 'cc', 'fiedler']
-    # to save recomputation. Look at the existing feature at first and then simply compute the new one.
+    # output: g with computed features
 
     if len(g)<3: return
     assert nx.is_connected(g)
@@ -136,36 +134,22 @@ def function_basis(g, allowed, norm_flag = 'no'):
                 norm_ = norm(g, attr, norm_flag)
                 for n in g.nodes():
                     g._node[n][attr] /= float(norm_)
-    if 'graph_diameter' in allowed:
-        # diameter
-        graph_diameter = nx.diameter(g)
-        for n in g.nodes():
-            g._node[n]['graph_diameter'] = graph_diameter
+    
+    extended2_features = [
+        ('average_path', nx.average_shortest_path_length),
+        ('load_centrality', nx.load_centrality),
+        ('eccentricity', nx.eccentricity)]
 
-        deg_norm = norm(g, 'graph_diameter', norm_flag)
-        for n in g.nodes():
-            g._node[n]['graph_diameter'] /= float(deg_norm)
+    for feat_label, feat_func in extended2_features:
+        if feat_label in allowed:
+            value = feat_func(g)
+            for n in g.nodes():
+                g._node[n][feat_label] = value
 
-        # average_path
-        average_path = nx.average_shortest_path_length(g)
-        for n in g.nodes():
-            g._node[n]['average_path'] = average_path
-
-        deg_norm = norm(g, 'average_path', norm_flag)
-        for n in g.nodes():
-            g._node[n]['average_path'] /= float(deg_norm)
-
-        # avg_deg
-        nnodes = g.number_of_nodes()
-        avg_deg = sum(d for n, d in g.degree()) / float(nnodes)
-        for n in g.nodes():
-            g._node[n]['avg_deg'] = avg_deg
-
-        deg_norm = norm(g, 'avg_deg', norm_flag)
-        for n in g.nodes():
-            g._node[n]['avg_deg'] /= float(deg_norm)
-
-
+            deg_norm = norm(g, feat_label, norm_flag)
+            for n in g.nodes():
+                g._node[n][feat_label] /= float(deg_norm)
+        
     return g
 
 def get_subgraphs(g, threshold=1):

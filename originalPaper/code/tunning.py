@@ -76,23 +76,10 @@ def remove_zero_col(data, cor_flag=False):
     else:
         return X
 
-def merge_features(graph, graphs_, allowed=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg'], n_bin=30, his_norm_flag='yes', edge_flag=False, cdf_flag=False, uniform_flag = True):
-    # print('Number of bins are %s'%n_bin)
+def merge_features(graph, graphs_, allowed, n_bin=30, his_norm_flag='yes', edge_flag=False, cdf_flag=False, uniform_flag=True):
     n = len(graphs_)
     X = np.zeros((n, 1))
     for key in allowed:
-        # print(key)
-        if (key=='label') :
-            if graph == 'dd_test':
-                nbin = 90
-            else:
-                nbin = 40
-            tmp = hisgram_single_feature(graphs_, nbin, 'label', his_norm_flag=his_norm_flag, edge_flag=edge_flag, lowerbound=0, upperbound=1, cdf_flag=cdf_flag, uniform_flag=uniform_flag)
-
-        elif key == 'ricciCurvature': # use default bound for ricci curvature
-            tmp = hisgram_single_feature(graphs_, n_bin, key, his_norm_flag=his_norm_flag, edge_flag=edge_flag, cdf_flag=cdf_flag, uniform_flag=uniform_flag)
-        else:
-            tmp = hisgram_single_feature(graphs_, n_bin, key, his_norm_flag=his_norm_flag, edge_flag=edge_flag, cdf_flag=cdf_flag, uniform_flag=uniform_flag, lowerbound=0)
+        tmp = hisgram_single_feature(graphs_, n_bin, key, his_norm_flag=his_norm_flag, edge_flag=edge_flag, cdf_flag=cdf_flag, uniform_flag=uniform_flag, lowerbound=0)
         X = np.append(X, tmp, axis=1)
     return remove_zero_col(X[:,1:])
-
