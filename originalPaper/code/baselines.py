@@ -49,20 +49,21 @@ def convert_to_vectors_ldp(graphs, labels, hyperparams, extended=False):
         node_descriptors += []  # 'eccentricity', 'load_centrality', 'clustering_coefficient'
         aggregators += ['skew', 'kurtosis']
     
-    vectors = []
+    graphs_processed = []
     for i in range(len(graphs)):
-        gi = convert2nx(graphs[i], i)
-        subgraphs = get_subgraphs(gi)
-        gi_s = [compute_node_features(gi, node_descriptors, aggregators, norm_flag=norm_flag) for gi in subgraphs]
-        gi_s = [g for g in gi_s if g != None]
-        vectors.append(gi_s)
+        nx_graph = convert2nx(graphs[i], i)
+        subgraphs = [g for g in get_subgraphs(nx_graph)]
+        for g in subgraphs:
+            compute_node_features(g, node_descriptors, aggregators, norm_flag)
+        subgraphs = [g for g in subgraphs if g != None]
+        graphs_processed.append(subgraphs)
 
     feature_keys = get_all_feature_keys(node_descriptors, aggregators)
     if norm_flag == 'no':
-        vectors = new_norm(vectors, feature_keys) 
+        graphs_processed = new_norm(graphs_processed, feature_keys) 
 
     x_original = merge_features(
-        vectors,
+        graphs_processed,
         feature_keys,
         n_bin=hyperparams['n_bin'], 
         his_norm_flag=hyperparams['his_norm_flag'], 

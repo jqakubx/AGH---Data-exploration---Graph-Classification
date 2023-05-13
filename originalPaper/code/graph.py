@@ -141,8 +141,6 @@ def compute_node_features(graph, node_descriptors, aggregators, norm_flag='no'):
         for node_idx in graph.nodes():
             aggregate_over_neighbors(graph, node_idx, descr, aggregators)
         normalize_sum(graph, descr, norm_flag)
-            
-    return graph
 
 
 def get_subgraphs(g, threshold=1):
