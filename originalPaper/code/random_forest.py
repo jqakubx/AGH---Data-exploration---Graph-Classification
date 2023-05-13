@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val
 
 
 def evaluate_random_forest(X, Y, n_splits, n_eval = 10, **rf_kwargs):
-    print("Evaluating with Random Forest")
     cvs_accs = []
     cvs_f1s = []
     n = n_eval

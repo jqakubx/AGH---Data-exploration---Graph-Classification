@@ -6,6 +6,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics.pairwise import laplacian_kernel
 
+PRINT_TIME = False
+
 def timefunction(method, time_flag=False):
     def timed(*args, **kw):
         import time
@@ -16,7 +18,7 @@ def timefunction(method, time_flag=False):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
-            if (te-ts)>1:
+            if (te-ts)>1 and PRINT_TIME:
                 print('%r  %2.2f s' % (method.__name__, (te - ts) ))
         if time_flag == False:
             return result
@@ -62,7 +64,6 @@ def search_params_svm(X, Y, i, test_size=0.1, nonlinear_flag='False', verbose=0,
 
 @timefunction
 def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
-    print("Evaluating with SVM")
     cvs_accs = []
     cvs_f1s = []
     n = n_eval
