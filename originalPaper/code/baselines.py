@@ -46,7 +46,7 @@ def convert_to_vectors_ldp(graphs, labels, hyperparams, extended=False):
     aggregators = ['min', 'max', 'mean', 'std']
 
     if extended:
-        node_descriptors += []  # 'eccentricity', 'load_centrality', 'clustering_coefficient'
+        node_descriptors += ['eccentricity', 'load_centrality', 'clustering']
         aggregators += ['skew', 'kurtosis']
     
     graphs_processed = []
@@ -57,7 +57,7 @@ def convert_to_vectors_ldp(graphs, labels, hyperparams, extended=False):
             compute_node_features(g, node_descriptors, aggregators, norm_flag)
         subgraphs = [g for g in subgraphs if g != None]
         graphs_processed.append(subgraphs)
-
+    
     feature_keys = get_all_feature_keys(node_descriptors, aggregators)
     if norm_flag == 'no':
         graphs_processed = new_norm(graphs_processed, feature_keys) 

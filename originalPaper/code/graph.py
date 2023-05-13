@@ -1,8 +1,7 @@
 import networkx as nx
-from joblib import Parallel, delayed
 import pickle
-import os, sys
-import time
+import os
+import math
 import scipy.stats
 import numpy as np
 
@@ -77,8 +76,8 @@ def aggregate_over_neighbors(graph, node_idx, descr, aggregators):
         'max':      (f'1_0_{descr}_max',      np.max),
         'std':      (f'1_0_{descr}_std',      np.std),
         'sum':      (f'1_0_{descr}_sum',      np.sum),
-        'kurtosis': (f'1_0_{descr}_kurtosis', scipy.stats.kurtosis),
-        'skew':     (f'1_0_{descr}_skew',     scipy.stats.skew)
+        'kurtosis': (f'1_0_{descr}_kurtosis', scipy.stats.kurtosis),  # may return NaN, in which case we set it to 0
+        'skew':     (f'1_0_{descr}_skew',     scipy.stats.skew)       # may return NaN, in which case we set it to 0
     }
 
     for agg in aggregators:
@@ -86,8 +85,9 @@ def aggregate_over_neighbors(graph, node_idx, descr, aggregators):
 
         if len(neighbors_descr) == 0:
             node[agg_lbl] = 0
-        else:
-            node[agg_lbl] = agg_func(neighbors_descr)
+        
+        agg_val = agg_func(neighbors_descr)
+        node[agg_lbl] = agg_val if math.isfinite(agg_val) else 0
 
 
 def norm(g, key, flag):
@@ -98,10 +98,17 @@ def norm(g, key, flag):
 
 
 def get_node_descr_dict(g, descr):
-    if descr == 'deg':
-        return dict(nx.degree(g))
-    else:
+    descr_funcs = {
+        'deg': nx.degree,
+        'eccentricity': nx.eccentricity,
+        'load_centrality': nx.load_centrality,
+        'clustering': nx.load_centrality
+    }
+    try:
+        func = descr_funcs[descr]
+    except KeyError:
         raise Exception(f'Unsupported node descriptor "{descr}"')
+    return dict(func(g))
 
 
 def compute_descr_all_nodes(graph, descr, norm_flag):
@@ -150,10 +157,10 @@ def get_subgraphs(g, threshold=1):
     return subgraphs
 
 
-def new_norm(graphs_, bl_feat=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg']):
+def new_norm(graphs_, feature_keys):
     """Normalize graph function uniformly"""
-    newnorm = dict(zip(bl_feat, [0] * 5))
-    for attr in bl_feat:
+    newnorm = dict(zip(feature_keys, [0] * len(feature_keys)))
+    for attr in feature_keys:
         for gs in graphs_:
             for g in gs:
                 tmp = max(nx.get_node_attributes(g, attr).values())
@@ -163,7 +170,7 @@ def new_norm(graphs_, bl_feat=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_
     for gs in graphs_:
         for g in gs:
             for n in g.nodes():
-                for attr in bl_feat:
+                for attr in feature_keys:
                     g._node[n][attr] /= float(newnorm[attr])
                     assert g._node[n][attr] <=1
     return graphs_
