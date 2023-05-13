@@ -3,7 +3,7 @@ from joblib import Parallel, delayed
 import pickle
 import os, sys
 import time
-from scipy.stats import skew, kurtosis
+import scipy.stats
 import numpy as np
 
 def make_direct(direct):
@@ -12,8 +12,10 @@ def make_direct(direct):
     if not os.path.exists(direct):
             os.makedirs(direct)
 
+
 def load_graph_pyg(graphs):
     pass
+
 
 def load_graph(graph, debug='off', single_graph_flag=True):
     # print(f'Loading graph from dataset {graph}')
@@ -61,118 +63,94 @@ def convert2nx(graph, i, print_flag='False'):
     if print_flag=='True': print('graph: %s, nnodes: %s, n_edges: %s' %(i, len(gi), len(gi.edges)) )
     return gi
 
-def attribute_mean(g, i, key='deg', cutoff=1, iteration=0):
-    # g = graphs_[i][0]
-    # g = graphs_[0][0]
-    # attribute_mean(g, 0, iteration=1)
-    for itr in [iteration]:
-        assert key in g._node[i].keys()
-        # nodes_b = nx.single_source_shortest_path_length(g,i,cutoff=cutoff).keys()
-        # nodes_a = nx.single_source_shortest_path_length(g,i,cutoff=cutoff-1).keys()
-        # nodes = [k for k in nodes_b if k not in nodes_a]
-        nodes = g[i].keys()
 
-        if iteration == 0:
-            nbrs_deg = [g._node[j][key] for j in nodes]
+def aggregate_over_neighbors(graph, node_idx, descr, aggregators):
+    node = graph._node[node_idx]
+    assert descr in node.keys()
+
+    neighbors = graph[node_idx].keys()
+    neighbors_descr = [graph._node[j][descr] for j in neighbors]
+
+    agg_lbls_funcs = {
+        'mean':     (f'1_0_{descr}_mean',     np.mean),
+        'min':      (f'1_0_{descr}_min',      np.min),
+        'max':      (f'1_0_{descr}_max',      np.max),
+        'std':      (f'1_0_{descr}_std',      np.std),
+        'sum':      (f'1_0_{descr}_sum',      np.sum),
+        'kurtosis': (f'1_0_{descr}_kurtosis', scipy.stats.kurtosis),
+        'skew':     (f'1_0_{descr}_skew',     scipy.stats.skew)
+    }
+
+    for agg in aggregators:
+        agg_lbl, agg_func = agg_lbls_funcs[agg]
+
+        if len(neighbors_descr) == 0:
+            node[agg_lbl] = 0
         else:
-            key_ = str(cutoff) + '_' + str(itr-1) + '_' + key +  '_' + 'mean'
-            nbrs_deg = [g._node[j][key_] for j in nodes]
-            g._node[i][ str(cutoff) + '_' + str(itr) + '_' + key] = np.mean(nbrs_deg)
-            return
-
-        oldkey = key
-        key = str(cutoff) + '_' + str(itr) + '_' + oldkey
-        key_mean = key + '_mean'; key_min = key + '_min'; key_max = key + '_max'; key_std = key + '_std'
-        key_sum = key + '_sum'; key_kurtosis = key + '_kurtosis'; key_skew = key + '_skew';
-
-        if len(nbrs_deg) == 0:
-            g._node[i][key_mean] = 0
-            g._node[i][key_min] = 0
-            g._node[i][key_max] = 0
-            g._node[i][key_std] = 0
-            g._node[i][key_sum] = 0
-            g._node[i][key_kurtosis] = 0
-            g._node[i][key_skew] = 0
-        else:
-            # assert np.max(nbrs_deg) < 1.1
-            g._node[i][key_mean] = np.mean(nbrs_deg)
-            g._node[i][key_min] = np.min(nbrs_deg)
-            g._node[i][key_max] = np.max(nbrs_deg)
-            g._node[i][key_std] = np.std(nbrs_deg)
-            g._node[i][key_sum] = np.sum(nbrs_deg)
-            g._node[i][key_kurtosis] = kurtosis(nbrs_deg)
-            g._node[i][key_skew] = skew(nbrs_deg)
-
-def function_basis(g, allowed, norm_flag = 'no'):
-    # input: g
-    # output: g with ricci, deg, hop, cc, fiedler computed
-    # allowed = ['ricci', 'deg', 'hop', 'cc', 'fiedler']
-    # to save recomputation. Look at the existing feature at first and then simply compute the new one.
-
-    if len(g)<3: return
-    assert nx.is_connected(g)
-
-    def norm(g, key, flag=norm_flag):
-        if flag=='no':
-            return 1
-        elif flag == 'yes':
-            return np.max(np.abs(nx.get_node_attributes(g, key).values())) + 1e-6
-
-    if 'deg' in allowed:
-        deg_dict = dict(nx.degree(g))
-        for n in g.nodes():
-            g._node[n]['deg'] = deg_dict[n]
-            # g_ricci._node[n]['deg'] = np.log(deg_dict[n]+1)
-
-        deg_norm = norm(g, 'deg', norm_flag)
-        for n in g.nodes():
-            g._node[n]['deg'] /= float(deg_norm)
-    if 'deg' in allowed:
-        for n in g.nodes():
-            attribute_mean(g, n, key='deg', cutoff=1, iteration=0)
-        if norm_flag == 'yes':
-            # better normalization
-            for attr in [ '1_0_deg_sum']: # used to include 1_0_deg_std/ deleted now:
-                norm_ = norm(g, attr, norm_flag)
-                for n in g.nodes():
-                    g._node[n][attr] /= float(norm_)
-    if 'graph_diameter' in allowed:
-        # diameter
-        graph_diameter = nx.diameter(g)
-        for n in g.nodes():
-            g._node[n]['graph_diameter'] = graph_diameter
-
-        deg_norm = norm(g, 'graph_diameter', norm_flag)
-        for n in g.nodes():
-            g._node[n]['graph_diameter'] /= float(deg_norm)
-
-        # average_path
-        average_path = nx.average_shortest_path_length(g)
-        for n in g.nodes():
-            g._node[n]['average_path'] = average_path
-
-        deg_norm = norm(g, 'average_path', norm_flag)
-        for n in g.nodes():
-            g._node[n]['average_path'] /= float(deg_norm)
-
-        # avg_deg
-        nnodes = g.number_of_nodes()
-        avg_deg = sum(d for n, d in g.degree()) / float(nnodes)
-        for n in g.nodes():
-            g._node[n]['avg_deg'] = avg_deg
-
-        deg_norm = norm(g, 'avg_deg', norm_flag)
-        for n in g.nodes():
-            g._node[n]['avg_deg'] /= float(deg_norm)
+            node[agg_lbl] = agg_func(neighbors_descr)
 
 
-    return g
+def norm(g, key, flag):
+    if flag=='no':
+        return 1.0
+    elif flag == 'yes':
+        return float(np.max(np.abs(nx.get_node_attributes(g, key).values())) + 1e-6)
+
+
+def get_node_descr_dict(g, descr):
+    if descr == 'deg':
+        return dict(nx.degree(g))
+    else:
+        raise Exception(f'Unsupported node descriptor "{descr}"')
+
+
+def compute_descr_all_nodes(graph, descr, norm_flag):
+    descr_dict = get_node_descr_dict(graph, descr)
+
+    for node_idx in graph.nodes():
+        node = graph._node[node_idx]
+        node[descr] = descr_dict[node_idx]
+
+    descr_norm = norm(graph, descr, norm_flag)
+
+    for node_idx in graph.nodes():
+        node = graph._node[node_idx]
+        node[descr] /= descr_norm
+
+
+def normalize_sum(graph, descr, norm_flag):
+    if norm_flag == 'yes':
+        attr = f'1_0_{descr}_sum'
+        attr_norm = norm(graph, attr, norm_flag)
+        for node_idx in graph.nodes():
+            node = graph._node[node_idx]
+            node[attr] /= attr_norm
+
+
+def compute_node_features(graph, node_descriptors, aggregators, norm_flag='no'):
+    # input: graph
+    # output: graph with features computed
+
+    if len(graph) < 3:
+        return
+    
+    assert nx.is_connected(graph)
+
+    for descr in node_descriptors:
+        compute_descr_all_nodes(graph, descr, norm_flag)
+        for node_idx in graph.nodes():
+            aggregate_over_neighbors(graph, node_idx, descr, aggregators)
+        normalize_sum(graph, descr, norm_flag)
+            
+    return graph
+
 
 def get_subgraphs(g, threshold=1):
     assert str(type(g)) == "<class 'networkx.classes.graph.Graph'>"
     subgraphs = [g.subgraph(c).copy() for c in sorted(nx.connected_components(g), key=len, reverse=True)]
     subgraphs = [c for c in subgraphs if len(c) > threshold]
     return subgraphs
+
 
 def new_norm(graphs_, bl_feat=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg']):
     """Normalize graph function uniformly"""
@@ -191,13 +169,3 @@ def new_norm(graphs_, bl_feat=['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_
                     g._node[n][attr] /= float(newnorm[attr])
                     assert g._node[n][attr] <=1
     return graphs_
-
-def save_graphs_(graphs_, dataset='imdb_binary', norm_flag='yes'):
-    t0 = time.time()
-    direct = os.path.join('../data/cache/', dataset, 'norm_flag_' + str(norm_flag), '')
-    if not os.path.exists(direct): make_direct(direct)
-    with open(direct + 'graphs_', 'wb') as f:
-        pickle.dump(graphs_, f)
-    print('Saved graphs. Takes %s'%(time.time() - t0))
-
-
