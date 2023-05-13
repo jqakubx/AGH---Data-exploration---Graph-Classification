@@ -12,6 +12,15 @@ from random_forest import evaluate_random_forest
 
 
 def evaluate(dataset, classifier, baseline, hyperparams):
+    print("==========\n"\
+        + "EVALUATION\n"\
+        + "==========\n"
+        + f"Classifier: {classifier}\n"
+        + f"Baseline: {baseline}\n"
+        + f"Dataset: {dataset}\n"
+        + "---------------------"
+        )
+
     if dataset == "imdb_binary" or dataset == "imdb_multi":
         graphs, labels = load_graph(dataset)
     else:
@@ -26,7 +35,7 @@ def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
     elif baseline == 'graph_invariants':
         return convert_to_vectors_graph_invariants(graphs, labels)
     elif baseline == 'ldp_extended':
-        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended=True)
+        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended_features=['1_0_deg_kurtosis', '1_0_deg_skew'])
     else:
         raise Exception('Unsupported baseline')
 
