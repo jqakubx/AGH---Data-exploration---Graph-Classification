@@ -102,7 +102,7 @@ def get_node_descr_dict(g, descr):
         'deg': nx.degree,
         'eccentricity': nx.eccentricity,
         'load_centrality': nx.load_centrality,
-        'clustering': nx.load_centrality
+        'clustering': nx.clustering
     }
     try:
         func = descr_funcs[descr]
