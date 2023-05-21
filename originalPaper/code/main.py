@@ -28,7 +28,8 @@ def evaluate(dataset, classifier, baseline, hyperparams):
     x, y = convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams=hyperparams)
     evaluate_with_classifier(classifier, dataset, x, y)
     end = time.time()
-    print(f"Time: {end-start} s")
+    print('Time: %.4f s' % (end-start))
+
 
 def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
     if baseline == 'ldp':
@@ -84,4 +85,10 @@ if __name__ == '__main__':
     # evaluate(dataset, classifier='svm', baseline='graph_invariants', hyperparams=hyperparams)
     # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
     # evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
-    evaluate(dataset, classifier='random_forest', baseline='ldp_extended', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
+
+    # for dataset in ['IMDB-BINARY', 'IMDB-MULTI', 'REDDIT-BINARY', 'AIDS', 'COIL-DEL', 'COLLAB', 'ENZYMES' 'PROTEINS', 'SYNTHETIC',  'REDDIT-MULTI-5K', ]:
+
+    for dataset in ['REDDIT-MULTI-12K']:
+        for baseline in ['ldp', 'ldp_extended', 'graph_invariants']:
+            evaluate(dataset, classifier='random_forest', baseline=baseline, hyperparams=hyperparams)

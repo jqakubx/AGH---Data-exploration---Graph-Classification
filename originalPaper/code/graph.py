@@ -138,9 +138,9 @@ def compute_node_features(graph, node_descriptors, aggregators, norm_flag='no'):
     # input: graph
     # output: graph with features computed
 
-    if len(graph) < 3:
-        return
-    
+    # if len(graph) < 3:
+    #     return
+
     assert nx.is_connected(graph)
 
     for descr in node_descriptors:
@@ -163,14 +163,19 @@ def new_norm(graphs_, feature_keys):
     for attr in feature_keys:
         for gs in graphs_:
             for g in gs:
-                tmp = max(nx.get_node_attributes(g, attr).values())
-                if tmp > newnorm[attr]:
-                    newnorm[attr] = tmp
+                if len(nx.get_node_attributes(g, attr).values()) > 0:
+                    tmp = max(nx.get_node_attributes(g, attr).values())
+                    if tmp > newnorm[attr]:
+                        newnorm[attr] = tmp
 
     for gs in graphs_:
         for g in gs:
             for n in g.nodes():
-                for attr in feature_keys:
-                    g._node[n][attr] /= float(newnorm[attr])
-                    assert g._node[n][attr] <=1
+                if 'deg' not in g._node[n]:
+                    continue
+                else:
+                    for attr in feature_keys:
+                        if float(newnorm[attr]) != 0:
+                            g._node[n][attr] /= float(newnorm[attr])
+                            assert g._node[n][attr] <=1
     return graphs_

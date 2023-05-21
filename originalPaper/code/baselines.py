@@ -60,7 +60,7 @@ def convert_to_vectors_ldp(graphs, labels, hyperparams, extended=False):
     
     feature_keys = get_all_feature_keys(node_descriptors, aggregators)
     if norm_flag == 'no':
-        graphs_processed = new_norm(graphs_processed, feature_keys) 
+        graphs_processed = new_norm(graphs_processed, feature_keys)
 
     x_original = merge_features(
         graphs_processed,
