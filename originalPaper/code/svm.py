@@ -94,8 +94,8 @@ def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
         cvs_f1s.append(f1)
     accuracy = np.array(cvs_accs)
     f1 = np.array(cvs_f1s)
-    print('Cross val score accuracy: %s' % accuracy.mean())
-    print('Cross val score f1: %s' % f1.mean())
+    print('Cross val score accuracy: %.4f' % accuracy.mean())
+    print('Cross val score f1: %.4f' % f1.mean())
 
     cvs_accs = []
     cvs_f1s = []
@@ -120,5 +120,5 @@ def evaluate_svm(X, Y, best_params_, n_splits, n_eval = 10):
         cvs_f1s.append(f1)
     accuracy = np.array(cvs_accs)
     f1 = np.array(cvs_f1s)
-    print("Holdout Accuracy: %s" % accuracy.mean())
-    print('Holdout F1 score: %s' % f1.mean())
+    print("Holdout Accuracy: %.4f" % accuracy.mean())
+    print('Holdout F1 score: %.4f' % f1.mean())

@@ -1,6 +1,6 @@
 import argparse
-import networkx as nx
-import numpy as np
+import time
+
 
 from baselines import convert_to_vectors_graph_invariants, convert_to_vectors_ldp
 from graph import load_graph
@@ -20,22 +20,24 @@ def evaluate(dataset, classifier, baseline, hyperparams):
         + f"Dataset: {dataset}\n"
         + "---------------------"
         )
-
+    start = time.time()
     if dataset == "imdb_binary" or dataset == "imdb_multi":
         graphs, labels = load_graph(dataset)
     else:
         graphs, labels = load_graph_tudataset(dataset)
     x, y = convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams=hyperparams)
     evaluate_with_classifier(classifier, dataset, x, y)
+    end = time.time()
+    print('Time: %.4f s' % (end-start))
 
 
 def convert_graphs_to_vectors(dataset, graphs, labels, baseline, hyperparams):
     if baseline == 'ldp':
-        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams)
+        return convert_to_vectors_ldp(graphs, labels, hyperparams)
     elif baseline == 'graph_invariants':
         return convert_to_vectors_graph_invariants(graphs, labels)
     elif baseline == 'ldp_extended':
-        return convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended_features=['1_0_deg_kurtosis', '1_0_deg_skew'])
+        return convert_to_vectors_ldp(graphs, labels, hyperparams, extended=True)
     else:
         raise Exception('Unsupported baseline')
 
@@ -47,9 +49,9 @@ def evaluate_with_classifier(classifier, dataset, x, y):
         except Exception:
             print(f"No best SVM params found for {dataset}, using defaults.")
             svm_params = {'kernel': 'linear', 'C': 100}
-        evaluate_svm(x, y, svm_params, 10, n_eval=10)
+        evaluate_svm(x, y, svm_params, n_splits=5, n_eval=5)
     elif classifier == 'random_forest':
-        evaluate_random_forest(x, y, 10, n_eval=10)
+        evaluate_random_forest(x, y, n_splits=5, n_eval=5)
     else:
         raise Exception('Unsupported classifier')
 
@@ -81,6 +83,12 @@ if __name__ == '__main__':
 
     # evaluate(dataset, classifier='svm', baseline='ldp', hyperparams=hyperparams)
     # evaluate(dataset, classifier='svm', baseline='graph_invariants', hyperparams=hyperparams)
-    evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
-    evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
     # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='graph_invariants', hyperparams=hyperparams)
+    # evaluate(dataset, classifier='random_forest', baseline='ldp', hyperparams=hyperparams)
+
+    # for dataset in ['IMDB-BINARY', 'IMDB-MULTI', 'REDDIT-BINARY', 'AIDS', 'COIL-DEL', 'COLLAB', 'ENZYMES' 'PROTEINS', 'SYNTHETIC',  'REDDIT-MULTI-5K', ]:
+
+    for dataset in ['REDDIT-MULTI-12K']:
+        for baseline in ['ldp', 'ldp_extended', 'graph_invariants']:
+            evaluate(dataset, classifier='random_forest', baseline=baseline, hyperparams=hyperparams)

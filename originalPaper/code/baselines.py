@@ -2,10 +2,10 @@ import networkx as nx
 import numpy as np
 from networkx import NetworkXError
 
-from graph import function_basis, convert2nx, get_subgraphs, new_norm
+from graph import compute_node_features, convert2nx, get_subgraphs, new_norm
 from sklearn.preprocessing import normalize
 
-from tunning import merge_features
+from tunning import merge_features, get_all_feature_keys
 
 
 ### GRAPH INVARIANTS - basic graph baseline
@@ -39,29 +39,32 @@ def convert_to_vectors_graph_invariants(graphs, labels):
 
 ### LDP - original paper baseline
 
-def convert_to_vectors_ldp(dataset, graphs, labels, hyperparams, extended_features=[]):
+def convert_to_vectors_ldp(graphs, labels, hyperparams, extended=False):
     norm_flag = hyperparams['norm_flag']
+
+    node_descriptors = ['deg']
+    aggregators = ['min', 'max', 'mean', 'std']
+
+    if extended:
+        node_descriptors += ['eccentricity', 'load_centrality', 'clustering']
+        aggregators += ['skew', 'kurtosis']
     
-    vectors = []
+    graphs_processed = []
     for i in range(len(graphs)):
-        # if i % 50 == 0:
-        #     print('#', end='\n')
-        gi = convert2nx(graphs[i], i)
-        subgraphs = get_subgraphs(gi)
-        gi_s = [function_basis(gi, ['deg'], norm_flag=norm_flag) for gi in subgraphs]
-        gi_s = [g for g in gi_s if g != None]
-        vectors.append(gi_s)
+        nx_graph = convert2nx(graphs[i], i)
+        subgraphs = [g for g in get_subgraphs(nx_graph)]
+        for g in subgraphs:
+            compute_node_features(g, node_descriptors, aggregators, norm_flag)
+        subgraphs = [g for g in subgraphs if g != None]
+        graphs_processed.append(subgraphs)
+    
+    feature_keys = get_all_feature_keys(node_descriptors, aggregators)
     if norm_flag == 'no':
-        vectors = new_norm(vectors)
-
-    base_features = ['1_0_deg_min', '1_0_deg_max', '1_0_deg_mean', '1_0_deg_std', 'deg']
-
-    features = base_features+extended_features
+        graphs_processed = new_norm(graphs_processed, feature_keys)
 
     x_original = merge_features(
-        dataset, 
-        vectors,
-        allowed=features,
+        graphs_processed,
+        feature_keys,
         n_bin=hyperparams['n_bin'], 
         his_norm_flag=hyperparams['his_norm_flag'], 
         cdf_flag=hyperparams['cdf_flag'], 
